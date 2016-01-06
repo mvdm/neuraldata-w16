@@ -12,5 +12,5 @@ List of contributors:
 
 - Matt van der Meer: Psych & Brain Sci, neural basis of decision-making
 - Jessica Goold: Psych & Brain Sci, visual perception without awareness
-
+- Adam Crego: Psych & Brain Sci, habits
 
