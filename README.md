@@ -16,3 +16,4 @@ List of contributors:
 - Beth Smedley: Psych & Brain Sci, motivation and reward
 - Jeff Stott: Psych & Brain Sci, habitual versus deliberative decision-making in rodents
 - Emily Irvine: Psych & Brain Sci, neural basis of decision-making
+- Max Mehlman: Psych & Brain Sci, neural basis of spatial processing
