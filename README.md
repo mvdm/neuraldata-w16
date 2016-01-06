@@ -15,3 +15,4 @@ List of contributors:
 - Adam Crego: Psych & Brain Sci, habits
 - Beth Smedley: Psych & Brain Sci, motivation and reward
 - Jeff Stott: Psych & Brain Sci, habitual versus deliberative decision-making in rodents
+- Emily Irvine: Psych & Brain Sci, neural basis of decision-making
