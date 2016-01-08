@@ -18,3 +18,4 @@ List of contributors:
 - Emily Irvine: Psych & Brain Sci, neural basis of decision-making
 - Max Mehlman: Psych & Brain Sci, neural basis of spatial processing
 - Shawn Winter: Psych & Brain Sci, neural basis of spatial processing
+- Sirui Liu:  Psych & Brain Sci, vision
