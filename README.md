@@ -21,3 +21,4 @@ List of contributors:
 - Sirui Liu:  Psych & Brain Sci, vision
 - Mike Hasse: PEMM, corticothalamic feedback in vision
 - Shiva Farashahi: Psych & Brain Sci, reward and decision-making
+- Jin Hyun Cheong : Psych & Brain Sci, social and affective neuroscience
