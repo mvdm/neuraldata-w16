@@ -20,3 +20,4 @@ List of contributors:
 - Shawn Winter: Psych & Brain Sci, neural basis of spatial processing
 - Sirui Liu:  Psych & Brain Sci, vision
 - Mike Hasse: PEMM, corticothalamic feedback in vision
+- Shiva Farashahi: Psych & Brain Sci, reward and decision-making
