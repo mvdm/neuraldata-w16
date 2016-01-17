@@ -21,7 +21,7 @@ function h = MultiRaster(cfg_in,S)
 %           Size of marker for each spike
 %
 %       cfg.lfp - default NONE
-%           LFP data in ts format. Multiple sources of lfp data can be input as a single
+%           LFP data in tsd format. Multiple sources of lfp data can be input as a single
 %           cfg.lfp object by using a 1xM struct array where M is the number of lfp signals.
 %           (i.e., cfg.lfp(1) = lfpA; cfg.lfp(2) = lfpB)
 %
