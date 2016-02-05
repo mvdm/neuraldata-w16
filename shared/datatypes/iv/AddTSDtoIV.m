@@ -18,10 +18,11 @@ function iv = AddTSDtoIV(cfg_in,iv,tsd_in)
 % iv_out: output interval data
 %
 % MvdM 2014-06-24
+% converted to new usr field system, 2016-02-05
 
 cfg_def.method = 'max';
 
-cfg = ProcessConfig2(cfg_def,cfg_in); % should take whatever is in cfg_in and put it into cfg!
+cfg = ProcessConfig(cfg_def,cfg_in); % should take whatever is in cfg_in and put it into cfg!
 mfun = mfilename;
 
 % check for well formed input
@@ -55,13 +56,10 @@ switch cfg.method
 end
 
 if ~isfield(iv,'usr')
-    nu = 1;
-else
-    nu = length(iv.usr)+1;
+    iv.usr = [];
 end
 
-iv.usr(nu).data = data_temp;
-iv.usr(nu).label = cfg.label;
+iv.usr.(cfg.label) = data_temp;
 
 % housekeeping
 iv.cfg.history.mfun = cat(1,iv.cfg.history.mfun,mfun);
