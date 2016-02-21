@@ -10,6 +10,8 @@ function csc_tsd = LoadCSC(cfg_in)
 % cfg.TimeConvFactor = 10^-6; % from nlx units to seconds
 % cfg.VoltageConvFactor = 1; % factor of 1 means output will be in volts
 % cfg.verbose = 1; Allow or suppress displaying of command window text
+% cfg.label: optional cell array of labels, loads CSCs in order provided in
+%  cfg.fc
 %
 % OUTPUTS:
 %
@@ -21,6 +23,7 @@ cfg_def.fc = {};
 cfg_def.TimeConvFactor = 10^-6; % 10^-6 means convert nlx units to seconds
 cfg_def.VoltageConvFactor = 1; % 1 means output in volts, 1000 in mV, 10^6 in uV
 cfg_def.verbose = 1;
+cfg_def.label = [];
 
 mfun = mfilename;
 cfg = ProcessConfig(cfg_def,cfg_in,mfun); % this takes fields from cfg_in and puts them into cfg
@@ -41,8 +44,10 @@ if isempty(FindFiles(cfg.fc{1}))
     error('File does not exist in directory. Check spelling.');
 end
 
-fc = sort(cfg.fc);
-nFiles = length(fc);
+if isempty(cfg.label)
+    cfg.fc = sort(cfg.fc);
+end
+nFiles = length(cfg.fc);
 
 % track sample counts for different files, throw error if not equal
 sample_count_tvec = nan(nFiles,1);
@@ -54,7 +59,7 @@ if cfg.verbose; fprintf('%s: Loading %d file(s)...\n',mfun,nFiles); end
 
 for iF = 1:nFiles
     
-    fname = fc{iF};
+    fname = cfg.fc{iF};
     
     % load raw data
     [Timestamps, ~, SampleFrequencies, NumberOfValidSamples, Samples, Header] = Nlx2MatCSC(fname, [1 1 1 1 1], 1, 1, []);
@@ -136,8 +141,12 @@ for iF = 1:nFiles
     csc_tsd.tvec = tvec;
     csc_tsd.data(iF,:) = data;
     
-    [~,fn,fe] = fileparts(fname);
-    csc_tsd.label{iF} = cat(2,fn,fe);
+    if isempty(cfg.label)
+        [~,fn,fe] = fileparts(fname);
+        csc_tsd.label{iF} = cat(2,fn,fe);
+    else
+        csc_tsd.label{iF} = cfg.label{iF};
+    end
 
     csc_tsd.cfg.hdr{iF} = hdr;
     
