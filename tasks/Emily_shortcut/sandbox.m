@@ -1,5 +1,5 @@
 %%
-cd('/Users/jinhyuncheong/R042-2013-08-14/');
+cd('D:\data\R066\R066-2014-11-27');
 nTargets = 2;
 
 %% load raw data

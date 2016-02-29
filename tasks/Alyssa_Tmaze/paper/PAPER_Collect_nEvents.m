@@ -57,9 +57,12 @@
 
 % aacarey Dec 1 2015
 
-clear % note that this script will clear the base workspace prior to collecting data
+clearvars -except CFG
 
 %% WHAT DO YOU WANT THIS SCRIPT TO DO?
+
+% Which candidates file?
+cfg.whichCandidates = '-candidates'; % the suffix of the candidates file you want to load
 
 % Would you like to save the output?
 cfg.writeFiles = 1; % If 1, save the output variable as well as a record of
@@ -72,7 +75,7 @@ cfg.output_fd = [pwd,'\data'];
 cfg.output_fn = 'nEvents';
 
 % Which rats to use? (best to leave all here)
-cfg.rats = {'R042','R044','R050','R064'}; %{'R042','R044','R050','R064'};
+cfg.rats = TmazeRats;
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%                                                                     %%%
@@ -81,6 +84,13 @@ cfg.rats = {'R042','R044','R050','R064'}; %{'R042','R044','R050','R064'};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 tic % start timer
+
+% If master config exists, process cfg
+
+if exist('CFG','var')
+    cfg = ProcessConfig2(cfg,CFG.plot);
+end
+
 
 iWasHere = pwd; % remember original directory
 
@@ -121,7 +131,7 @@ for iRat = 1:length(cfg.rats)
         
         %~~~~~~~~~~~~~~~~~~~~~~~ Load data ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         ExpKeys = []; LoadExpKeys; disp(['     Restriction type: ',ExpKeys.RestrictionType])
-        evt = []; LoadCandidates; evt_original = evt;
+        evt = []; evt = loadpop([sessionID,cfg.whichCandidates,'.mat']); evt_original = evt;
         metadata = []; LoadMetadata
         
         % tell me how many total events were detected
@@ -187,6 +197,12 @@ if cfg.writeFiles % save the output
     save(cfg.output_fn,'nEvt')
 else
     disp('WARNING: You have selected not to save the output data')
+end
+
+%% If master config exists, save config history
+
+if exist('CFG','var')
+    CFG = History(CFG,mfilename,cfg);
 end
 
 disp('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')

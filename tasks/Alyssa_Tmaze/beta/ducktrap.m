@@ -165,6 +165,8 @@ cfg_def.lfpHeight = 15;
 cfg_def.lfpMax = 15;
 cfg_def.axislabel = 'on';
 cfg_def.windowSize = 1;
+
+mfun = mfilename;
 cfg = ProcessConfig2(cfg_def,cfg_in); % use ProcessConfig2 because there's complications with the MR fields on cfg_in
 
 S = []; % spike trains
@@ -206,7 +208,8 @@ if ~isempty(cfg.segments) && ~CheckIV(cfg.segments)
 elseif ~isempty(cfg.segments) && CheckIV(cfg.segments)
     % then plot interval boundaries as vertical lines
     cfg_temp.showLegend = 0;
-    cfg_temp.ColVal = [0 0 0; 1 1 1]; % black first, then white
+    cfg_temp.Color = [0 0 0; 1 1 1]; % black first, then white
+    cfg_temp.patch = 0;
     hSK = sidekick(cfg_temp,cfg.segments,cfg.segments);
     set(hSK(1),'LineWidth',3.5) % make the black line thicker than the white line
     
@@ -233,6 +236,7 @@ hfig = gcf;
 set(hfig,'Name',mfilename,'KeyPressFcn',@keystuff,'WindowButtonDownFcn',@clickstuff,'CloseRequestFcn',@leaveme);
 
 % I'm pulling some things out of cfg so I can "trace" them easier if I want to
+LFP = cfg.lfp; cfg = rmfield(cfg,'lfp'); % lfp is huge. don't let it be saved in config history
 mode = cfg.mode;
 trapwin = cfg.trapwin;
 clickColor = cfg.clickColor;
@@ -310,7 +314,7 @@ if ~isempty(cfg.segments) && CheckIV(cfg.segments)
     segmentCenters = IVcenters(cfg.segments); % for segment center navigation
 end
 
-if isfield(cfg,'lfp')
+if exist('LFP','var')
     % spectrogram button
     uicontrol('Style', 'pushbutton', 'String', 'Spectrogram',...
         'TooltipString','Plot spectrogram for current window',...
@@ -490,7 +494,7 @@ end
             end
             H = [];
         else
-            if isfield(cfg,'lfp') && ~isempty(cfg.lfp)               
+            if exist('LFP','var');               
                 HideSpectraxis
             end
             navigate(source,event)
@@ -522,24 +526,28 @@ end
                 switch mode
                     case 'fixed'
                         if ~isempty(cfg.resume)
-                           clicktimes = [clicktimes IVcenters(cfg.resume)]; 
+                           centers = [clicktimes IVcenters(cfg.resume)]; 
+                        else
+                            centers = clicktimes;
                         end
-                        clicktimes = sort(clicktimes);
-                        evt = iv(clicktimes - trapwin/2,clicktimes + trapwin/2);
-                        if isfield(cfg,'lfp')
-                            evt.label = cfg.lfp.label;
+                        centers = sort(centers);
+                        evt = iv(centers - trapwin/2,centers + trapwin/2);
+                        if exist('LFP','var')
+                            evt.label = LFP.label;
                         end
                         
                     case 'unfixed'
                         if ~isempty(cfg.resume)
-                           clicktimes.tstart = [clicktimes.tstart cfg.resume.tstart']; 
-                           clicktimes.tend = [clicktimes.tend cfg.resume.tend']; 
+                           intervals.tstart = [clicktimes.tstart cfg.resume.tstart']; 
+                           intervals.tend = [clicktimes.tend cfg.resume.tend'];
+                        else
+                            intervals = iv(clicktimes.tstart,clicktimes.tend);
                         end
-                        [clicktimes.tstart,idx] = sort(clicktimes.tstart);
-                        clicktimes.tend = clicktimes.tend(idx);
-                        evt = iv(clicktimes.tstart,clicktimes.tend);  
-                        if isfield(cfg,'lfp')
-                            evt.label = cfg.lfp.label;
+                        [intervals.tstart,idx] = sort(intervals.tstart);
+                        intervals.tend = intervals.tend(idx);
+                        evt = iv(intervals.tstart,intervals.tend);  
+                        if exist('LFP','var')
+                            evt.label = LFP.label;
                         end
                 end
                 
@@ -555,6 +563,9 @@ end
                 end
                 
                 evt.hdr = cfg.hdr;
+                
+                % housekeeping
+                evt = History(evt,mfun,cfg);
                 
                 [~,name,~] = fileparts(pwd);
                 uisave('evt',[name,'-manualIV']) % opens window for saving stuff
@@ -574,7 +585,7 @@ end
         uipressed = 1; % focus has been taken off of axes because of ui button press
         RoboDuck
         
-        if isfield(cfg,'lfp') && ~isempty(cfg.lfp)            
+        if exist('LFP','var')            
             HideSpectraxis
         end
         
@@ -621,7 +632,7 @@ end
         xlims = get(gca,'XLim');
         xticks = get(gca,'XTick');
         
-        CSCr = restrict(cfg.lfp,xlims(1),xlims(2)); % restrict to count the numbers of samples in viewing window
+        CSCr = restrict(LFP,xlims(1),xlims(2)); % restrict to count the numbers of samples in viewing window
         
         if length(CSCr.tvec) > 50000
             % outright refuse
@@ -649,7 +660,7 @@ end
         fs = length(CSCr.data)/(xlims(2)-xlims(1)); % get the local approx sampling frequency
         
         buffer = (nSamples/2)/fs; % how much time buffer is needed so that the spectrogram lines up with the data in viewing window
-        CSCr = restrict(cfg.lfp,xlims(1)-buffer,xlims(2)+buffer); % re-restrict with buffer
+        CSCr = restrict(LFP,xlims(1)-buffer,xlims(2)+buffer); % re-restrict with buffer
         
         % get frequencies of interest
         foi = str2double(get(frange(1),'String')):str2double(get(frange(2),'String')); % don't be evil..numbers only

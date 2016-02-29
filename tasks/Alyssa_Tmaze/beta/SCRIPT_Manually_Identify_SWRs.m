@@ -50,17 +50,20 @@
 % In this particular script, the data is divided into three segments: one for
 % each of the prerecord, task, and postrecord. When you run this script for
 % the first time, make sure that cfg.resumeSession = 0. A figure window
-% will open showing you the full length of data. Hit 'f' on the keyboard to
-% go to the first event (in this script, each event is one second of data).
-% You should see a vertical bar in the center of the screen. To verify that
-% this is the first segment of data, you can hit the "Teleport" button on 
-% the far right of the window with the drop down menus set to '1' and 
-% 'beginning'. To scroll through the data, move the figure window right and
+% will open showing you the full length of data. 
+% Press the 'f' key to go to the beginning of the data. Now, hit the 
+% "Teleport" button on the far right of the window with the drop down menus
+% set to '1' and 'beginning'. Now you should see a vertical bar in the
+% middle of the window with a purple patch object to the left and a white
+% background to the right. (Do not identify SWRs that are in the purple
+% regions unless the SWR straddles the boundry.)
+% To scroll through the data, move the figure window right and
 % left using the arrow keys. When you have reached the end of the first
 % segment of data you will see another vertical bar. You do not have to
 % navigate to the next segment using the keyboard (that might take a while
 % or some luck). Instead, select '2' and 'beginning' in the dropdown menus
-% and hit "Teleport".
+% and hit "Teleport". This takes you to the beginning of the second
+% segment.
 %
 % Save your progress frequently because ducktrap is in beta and power
 % outages don't care about you.
@@ -89,7 +92,8 @@ cfg.whichEpochs = {'prerecord','task','postrecord'}; %  {'prerecord','task','pos
 cfg.nSeconds = 720; % 720 seconds = 12 minutes
 
 % Select t files or tt files
-cfg.whichSFiles = 'tt'; % 't' for MClust t files (isolated units), or 'tt' for MakeTTFiles tt files (all spikes from tetrode)
+cfg.whichSFiles = 'none'; % 't' for MClust t files (isolated units), or 'tt' for MakeTTFiles tt files (all spikes from tetrode)
+% 'none' for no spike files available
 
 % Do you want the LFP filtered?
 cfg.FilterLFP = 1; % If 1, filters LFP between 40-450 Hz bfore plotting; if 0, doesn't
@@ -111,6 +115,17 @@ cfg.fn = 'manualIV'; % unique string identifier for the file you saved from a pr
 
 % Load some things, check some things
 
+if ~any(strcmp(cfg.whichEpochs,{'prerecord','task','postrecord'}))
+    error('cfg.whichEpochs contains unrecognized recording segment')
+end
+
+% get CSC
+LoadExpKeys
+please = [];
+please.fc = ExpKeys.goodSWR(1);
+please.resample = 2000;
+CSC = LoadCSC(please);
+
 % Load Spikes
 switch cfg.whichSFiles
     case 'tt'
@@ -123,20 +138,13 @@ switch cfg.whichSFiles
        please = []; % load 
        please.load_questionable_cells = 1;
        S = LoadSpikes(please);
+    case 'none'
+        S = ts;
+        S.t{1}(1,1) = CSC.tvec(1); % make a fake S because MultiRaster requires this as an input in order to work
+        S.t{1}(2,1) = CSC.tvec(end);
     otherwise
         error('Unrecognized cfg.whichSFiles. Better check that spelling.')
 end
-
-% Just cuz
-if any(~strcmp(cfg.whichEpochs,{'prerecord','task','postrecord'}))
-    error('cfg.whichEpochs contains unrecognized recording segment')
-end
-
-% get CSC
-LoadExpKeys
-please = [];
-please.fc = ExpKeys.goodSWR(1);
-CSC = LoadCSC(please);
 
 % get restriction times
 nSecondsPerEpoch = cfg.nSeconds/(length(cfg.whichEpochs));
