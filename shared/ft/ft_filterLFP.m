@@ -10,7 +10,6 @@ function data = ft_filterLFP(data,f,varargin)
 ford = 6;
 fmode = 'bandpass';
 Fs = data.hdr.Fs;
-extract_varargin;
 
 % build filter
 Wp = f * 2 / Fs; % pass band for filtering
@@ -24,6 +23,8 @@ switch fmode
     otherwise
         error('Unknown fmode.');
 end
+
+extract_varargin;
 
 % filter
 for iS = 1:length(data.trial)
